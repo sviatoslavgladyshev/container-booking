@@ -5,15 +5,15 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === "production" ? "/" : "/", // Set base to "/" for GitHub Pages
+  base: "/", // Required for GitHub Pages user site
   server: {
     host: "::",
     port: 8080,
-    allowedHosts: [".ngrok-free.app"], // Only needed for local dev with ngrok
+    allowedHosts: [".ngrok-free.app"], // Only for local dev
   },
   plugins: [
     react(),
-    mode === "development" && componentTagger(), // componentTagger only in dev
+    mode === "development" && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
