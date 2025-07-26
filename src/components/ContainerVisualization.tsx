@@ -56,56 +56,6 @@ export function ContainerVisualization({
     }
   }, [mode, nonStandardDimensions, container.slots]);
 
-  const calculateRequiredSlots = (dimensions: { width: number; height: number; length: number }) => {
-    // Standard slot: 1200mm x 1100mm x 2600mm
-    const standardSlot = { width: 1200, height: 1100, length: 2600 };
-    
-    // Calculate how many slots needed in each dimension
-    const slotsNeededWidth = Math.ceil(dimensions.width / standardSlot.width);
-    const slotsNeededLength = Math.ceil(dimensions.length / standardSlot.length);
-    
-    // Container has 4 slots per row, 5 rows
-    const totalSlotsNeeded = slotsNeededWidth * slotsNeededLength;
-    
-    // Find available consecutive slots
-    const availableSlots: number[] = [];
-    const grid = Array(5).fill(null).map(() => Array(4).fill(false));
-    
-    // Mark occupied slots
-    container.slots.forEach(slot => {
-      if (slot.isOccupied) {
-        const row = Math.floor((slot.id - 1) / 4);
-        const col = (slot.id - 1) % 4;
-        grid[row][col] = true;
-      }
-    });
-    
-    // Find first available rectangle that fits
-    for (let row = 0; row <= 5 - Math.ceil(totalSlotsNeeded / 4); row++) {
-      for (let col = 0; col <= 4 - slotsNeededWidth; col++) {
-        let canFit = true;
-        const slotsToCheck: number[] = [];
-        
-        for (let r = row; r < row + Math.ceil(totalSlotsNeeded / 4); r++) {
-          for (let c = col; c < col + slotsNeededWidth; c++) {
-            if (r >= 5 || c >= 4 || grid[r][c]) {
-              canFit = false;
-              break;
-            }
-            slotsToCheck.push(r * 4 + c + 1);
-          }
-          if (!canFit) break;
-        }
-        
-        if (canFit && slotsToCheck.length >= totalSlotsNeeded) {
-          return slotsToCheck.slice(0, totalSlotsNeeded);
-        }
-      }
-    }
-    
-    return [];
-  };
-
   const handleSlotSelect = (slot: SlotData) => {
     if (mode === 'palletized') {
       setSelectedSlots([slot.id]);

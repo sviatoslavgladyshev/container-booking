@@ -2,6 +2,12 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { InvoiceData } from '@/components/PurchaseModal';
 
+declare global {
+  interface Window {
+    JsBarcode?: any;
+  }
+}
+
 export interface PDFOptions {
   language: 'en' | 'ru' | 'zh';
 }
@@ -91,7 +97,7 @@ const translations = {
 };
 
 export function generatePDFFromElement(element: HTMLElement, filename: string, options: PDFOptions = { language: 'en' }): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     html2canvas(element, {
       scale: 2,
       useCORS: true,
@@ -146,14 +152,14 @@ export async function generateInvoicePDF(invoiceData: InvoiceData, options: PDFO
   }
   
   // Load JsBarcode
-  const loadJsBarcode = new Promise((resolve) => {
+  const loadJsBarcode = new Promise<void>((resolve) => {
     if (window.JsBarcode) {
       resolve();
       return;
     }
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js';
-    script.onload = resolve;
+    script.onload = () => resolve();
     script.onerror = () => console.error('Failed to load JsBarcode');
     document.head.appendChild(script);
   });
@@ -243,9 +249,9 @@ export async function generateInvoicePDF(invoiceData: InvoiceData, options: PDFO
 
   // Wait for fonts and rendering
   await document.fonts.ready;
-  await new Promise(resolve => setTimeout(resolve, 100)); // Small delay for rendering
+  await new Promise<void>(resolve => setTimeout(resolve, 100)); // Small delay for rendering
 
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     html2canvas(tempDiv, {
       scale: 2,
       useCORS: true,
