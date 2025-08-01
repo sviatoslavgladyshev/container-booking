@@ -54,9 +54,9 @@ interface MaterialCreator {
 function Container3D() {
   const ref = useRef<THREE.Group>(null!);
 
-  const materials = useLoader(MTLLoader, 'public/models/12281_Container_v2_L2.mtl') as MaterialCreator;
+  const materials = useLoader(MTLLoader, '@/assets/12281_Container_v2_L2.mtl') as MaterialCreator;
 
-  const obj = useLoader(OBJLoader, 'public/models/12281_Container_v2_L2.obj', (loader) => {
+  const obj = useLoader(OBJLoader, '@/assets/12281_Container_v2_L2.obj', (loader) => {
     materials.preload();
     loader.setMaterials(materials);
   }) as THREE.Group;
