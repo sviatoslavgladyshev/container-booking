@@ -32,7 +32,7 @@ All colors MUST be HSL.
     --muted-foreground: 215 15% 55%;
 
     /* Accent orange for containers */
-    --accent: 25 95% 53%;
+    --accent: 210 85% 35%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -43,7 +43,7 @@ All colors MUST be HSL.
     --ring: 210 85% 35%;
 
     /* Custom maritime colors */
-    --container-orange: 25 95% 53%;
+    --container-orange: 210 85% 35%;
     --ocean-blue: 210 85% 35%;
     --steel-gray: 215 25% 65%;
     --port-green: 145 63% 42%;
@@ -51,12 +51,12 @@ All colors MUST be HSL.
 
     /* Gradients */
     --gradient-ocean: linear-gradient(135deg, hsl(210 85% 35%), hsl(210 85% 55%));
-    --gradient-container: linear-gradient(135deg, hsl(25 95% 53%), hsl(35 95% 63%));
+    --gradient-container: linear-gradient(135deg, hsl(210 85% 35%), hsl(210 85% 55%));
     --gradient-steel: linear-gradient(180deg, hsl(215 25% 95%), hsl(215 25% 85%));
 
     /* Shadows */
     --shadow-container: 0 8px 32px -8px hsl(210 85% 35% / 0.3);
-    --shadow-slot: 0 4px 16px -4px hsl(25 95% 53% / 0.2);
+    --shadow-slot: 0 4px 16px -4px hsl(210 85% 35% / 0.2);
     --shadow-card: 0 6px 24px -6px hsl(210 50% 15% / 0.1);
 
     --radius: 0.5rem;
@@ -98,7 +98,7 @@ All colors MUST be HSL.
     --muted: 215 25% 15%;
     --muted-foreground: 215 15% 65%;
 
-    --accent: 25 95% 53%;
+    --accent: 210 85% 55%;
     --accent-foreground: 210 50% 8%;
 
     --destructive: 0 62.8% 50%;
@@ -109,7 +109,7 @@ All colors MUST be HSL.
     --ring: 210 85% 55%;
 
     /* Dark theme maritime colors */
-    --container-orange: 25 95% 53%;
+    --container-orange: 210 85% 55%;
     --ocean-blue: 210 85% 55%;
     --steel-gray: 215 25% 45%;
     --port-green: 145 63% 52%;
@@ -117,12 +117,12 @@ All colors MUST be HSL.
 
     /* Dark gradients */
     --gradient-ocean: linear-gradient(135deg, hsl(210 85% 25%), hsl(210 85% 45%));
-    --gradient-container: linear-gradient(135deg, hsl(25 95% 43%), hsl(35 95% 53%));
+    --gradient-container: linear-gradient(135deg, hsl(210 85% 25%), hsl(210 85% 45%));
     --gradient-steel: linear-gradient(180deg, hsl(215 25% 15%), hsl(215 25% 20%));
 
     /* Dark shadows */
     --shadow-container: 0 8px 32px -8px hsl(0 0% 0% / 0.4);
-    --shadow-slot: 0 4px 16px -4px hsl(25 95% 53% / 0.3);
+    --shadow-slot: 0 4px 16px -4px hsl(210 85% 55% / 0.3);
     --shadow-card: 0 6px 24px -6px hsl(0 0% 0% / 0.2);
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;

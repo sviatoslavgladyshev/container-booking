@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -11,8 +12,6 @@ export interface SlotData {
     height: number;
     length: number;
   };
-  weight?: number;
-  maxWeight: number;
   occupiedBy?: string;
 }
 
@@ -21,14 +20,17 @@ interface ContainerSlotProps {
   onSelect: (slot: SlotData) => void;
   isSelected?: boolean;
   selectedSlots?: number[];
+  className?: string; // Added to fix ts(2322)
 }
 
 export function ContainerSlot({ 
   slot, 
   onSelect, 
   isSelected = false,
-  selectedSlots = []
+  selectedSlots = [],
+  className
 }: ContainerSlotProps) {
+  const { t } = useTranslation();
   const isPartOfSelection = selectedSlots.includes(slot.id);
   
   return (
@@ -37,28 +39,28 @@ export function ContainerSlot({
         <div
           onClick={() => !slot.isOccupied && onSelect(slot)}
           className={cn(
-            "relative aspect-square border-2 rounded-lg transition-all duration-300 cursor-pointer",
+            "relative aspect-square border-2 rounded-lg transition-all duration-300 cursor-pointer group",
             "flex flex-col items-center justify-center p-2 text-xs font-medium",
             "hover:scale-105 hover:shadow-slot",
             slot.isOccupied 
               ? "bg-muted border-muted-foreground/30 cursor-not-allowed opacity-60" 
-              : "bg-card border-border hover:border-primary/50",
-            (isSelected || isPartOfSelection) && "border-primary bg-primary/10 shadow-slot",
-            !slot.isOccupied && "hover:bg-gradient-container"
+              : className, // Apply sector-specific styling
+            (isSelected || isPartOfSelection) && "border-primary bg-primary/10 shadow-slot"
           )}
         >
           <div className="text-center">
-            <div className="font-bold text-lg">
+            <div className={cn(
+              "font-bold text-lg",
+              !slot.isOccupied && "group-hover:text-white"
+            )}>
               {slot.isOccupied ? "USED" : `$${slot.price}`}
             </div>
-            <div className="text-muted-foreground text-xs">
+            <div className={cn(
+              "text-muted-foreground text-xs",
+              !slot.isOccupied && "group-hover:text-white"
+            )}>
               Slot {slot.id}
             </div>
-            {slot.weight && (
-              <Badge variant="secondary" className="mt-1 text-xs">
-                {slot.weight}kg
-              </Badge>
-            )}
           </div>
           
           {(isSelected || isPartOfSelection) && (
@@ -74,8 +76,6 @@ export function ContainerSlot({
       <TooltipContent>
         <div className="space-y-1">
           <p className="font-semibold">Slot {slot.id}</p>
-          <p>Dimensions: {slot.dimensions.width} × {slot.dimensions.height} × {slot.dimensions.length} mm</p>
-          <p>Max Weight: {slot.maxWeight}kg</p>
           <p>Price: ${slot.price}</p>
           {slot.isOccupied && <p className="text-destructive">Occupied by: {slot.occupiedBy}</p>}
         </div>

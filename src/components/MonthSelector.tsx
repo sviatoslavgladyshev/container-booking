@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Calendar } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 interface MonthSelectorProps {
   selectedMonth: number;
@@ -53,7 +54,10 @@ export function MonthSelector({ selectedMonth, selectedYear, onMonthChange }: Mo
           <DropdownMenuItem 
             key={`${month}-${year}`}
             onClick={() => onMonthChange(month, year)}
-            className={selectedMonth === month && selectedYear === year ? 'bg-primary/10' : ''}
+            className={cn(
+              selectedMonth === month && selectedYear === year ? 'bg-blue-100 text-blue-900' : '',
+              'data-[highlighted]:bg-blue-100 data-[highlighted]:text-blue-900'
+            )}
           >
             {t(months[month])} {year}
           </DropdownMenuItem>

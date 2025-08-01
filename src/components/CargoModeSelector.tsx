@@ -17,8 +17,7 @@ interface CargoModeSelectorProps {
     length: number;
   };
   onDimensionsChange: (dimensions: { width: number; height: number; length: number }) => void;
-  weight: number;
-  onWeightChange: (weight: number) => void;
+  onTabChange: (tab: string) => void;
 }
 
 export function CargoModeSelector({
@@ -26,12 +25,11 @@ export function CargoModeSelector({
   onModeChange,
   dimensions,
   onDimensionsChange,
-  weight,
-  onWeightChange
+  onTabChange
 }: CargoModeSelectorProps) {
   const { t } = useTranslation();
   const [localDimensions, setLocalDimensions] = useState(
-    dimensions || { width: 1200, height: 1100, length: 2600 }
+    dimensions || { width: 1200, height: 2500, length: 2600 }
   );
 
   const handleDimensionChange = (field: 'width' | 'height' | 'length', value: string) => {
@@ -41,8 +39,7 @@ export function CargoModeSelector({
     onDimensionsChange(newDimensions);
   };
 
-  const isWeightValid = weight <= 1300;
-  const standardSlotSize = "1200mm × 1100mm × 2600mm";
+  const standardSlotSize = t('standardSlotSize'); // Use translation key for consistency
 
   return (
     <Card className="shadow-maritime">
@@ -110,47 +107,78 @@ export function CargoModeSelector({
           </div>
         </div>
 
-        {/* Weight Input */}
-        <div className="space-y-2">
-          <Label htmlFor="weight" className="flex items-center gap-2">
-            {t('weight')}
-            <Tooltip>
-              <TooltipTrigger>
-                <HelpCircle className="w-3 h-3 opacity-50" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t('weightLimit')}</p>
-              </TooltipContent>
-            </Tooltip>
-          </Label>
-          <div className="relative">
-            <Input
-              id="weight"
-              type="number"
-              value={weight}
-              onChange={(e) => onWeightChange(parseInt(e.target.value) || 0)}
-              max={1300}
-              className={cn(
-                "pr-16",
-                !isWeightValid && "border-destructive focus:border-destructive"
-              )}
-            />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-              kg
-            </span>
+        {/* Standard Dimensions for Palletized */}
+        {mode === 'palletized' && (
+          <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
+            <Label className="text-base font-medium">{t('standardDimensions')}</Label>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pallet-length">{t('length')}</Label>
+                <Input
+                  id="pallet-length"
+                  type="text"
+                  value="2600"
+                  readOnly
+                  className="bg-muted text-muted-foreground cursor-not-allowed"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pallet-width">{t('width')}</Label>
+                <Input
+                  id="pallet-width"
+                  type="text"
+                  value="1200"
+                  readOnly
+                  className="bg-muted text-muted-foreground cursor-not-allowed"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pallet-height">{t('height')}</Label>
+                <Input
+                  id="pallet-height"
+                  type="text"
+                  value="2500"
+                  readOnly
+                  className="bg-muted text-muted-foreground cursor-not-allowed"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{t('oneSlotOnePallet')}</span>
+              <Tooltip>
+                <TooltipTrigger>
+                  <HelpCircle className="w-3 h-3" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('standardSlotSize')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <Button
+              variant="link"
+              className="p-0 h-auto text-xs"
+              onClick={() => onTabChange('size')}
+            >
+              {t('viewSlotDetails')}
+            </Button>
           </div>
-          {!isWeightValid && (
-            <p className="text-sm text-destructive">
-              {t('weightExceeds')}
-            </p>
-          )}
-        </div>
+        )}
 
         {/* Custom Dimensions for Non-Standard */}
         {mode === 'non-standard' && (
           <div className="space-y-4 p-4 bg-muted/30 rounded-lg border">
             <Label className="text-base font-medium">{t('customDimensions')}</Label>
             <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="length">{t('length')}</Label>
+                <Input
+                  id="length"
+                  type="number"
+                  value={localDimensions.length}
+                  onChange={(e) => handleDimensionChange('length', e.target.value)}
+                  placeholder="2600"
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="width">{t('width')}</Label>
                 <Input
@@ -168,23 +196,28 @@ export function CargoModeSelector({
                   type="number"
                   value={localDimensions.height}
                   onChange={(e) => handleDimensionChange('height', e.target.value)}
-                  placeholder="1100"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="length">{t('length')}</Label>
-                <Input
-                  id="length"
-                  type="number"
-                  value={localDimensions.length}
-                  onChange={(e) => handleDimensionChange('length', e.target.value)}
-                  placeholder="2600"
+                  placeholder="2500"
                 />
               </div>
             </div>
-            <div className="text-xs text-muted-foreground">
-              {t('standardSlot')}: {standardSlotSize}
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{t('oneSlotOnePallet')}</span>
+              <Tooltip>
+                <TooltipTrigger>
+                  <HelpCircle className="w-3 h-3" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('standardSlotSize')}</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
+            <Button
+              variant="link"
+              className="p-0 h-auto text-xs"
+              onClick={() => onTabChange('size')}
+            >
+              {t('viewSlotDetails')}
+            </Button>
           </div>
         )}
       </CardContent>

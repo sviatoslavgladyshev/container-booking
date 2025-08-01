@@ -9,7 +9,7 @@ const resources = {
       subtitle: "Secure your cargo space with transparent pricing",
       
       // Navigation
-      buyPlace: "Buy a Place",
+      home: "Home",
       company: "Company",
       slotSize: "Slot Size",
       howItWorks: "How It Works",
@@ -35,6 +35,10 @@ const resources = {
       height: "Height",
       length: "Length",
       standardSlot: "Standard slot",
+      standardDimensions: "Standard Pallet Dimensions",
+      oneSlotOnePallet: "1 slot = 1 standard pallet space",
+      viewSlotDetails: "View Slot Size Details",
+      standardSlotSize: "2600mm × 1200mm × 2500mm",
       
       // Container Selection
       availableContainers: "Available Containers",
@@ -42,12 +46,14 @@ const resources = {
       select: "Select",
       container: "Container",
       departure: "Departure",
+      deliveryDeadline: "Cargo Delivery Deadline",
+      route: "Route",
       available: "Available",
       dimensionsDontFit: "Dimensions don't fit",
       selectedSlots: "Selected",
       slots: "slot(s)",
       total: "Total",
-      selectThisContainer: "Select This Container",
+      selectThisContainer: "Confirm Selection",
       
       // Purchase Modal
       completeBooking: "Complete Your Booking",
@@ -119,14 +125,36 @@ const resources = {
       slotsPerContainer: "Slots per Container",
       layout: "Layout",
       containersPerMonth: "Containers per Month",
-      
-      // How It Works
+      weightCapacity: "Weight Capacity",
+      maxWeightPerSlot: "Max Weight per Slot",
+      containerLoadCapacity: "Container Load Capacity",
+      containerSize: "Container size LxWxH: 12045 × 2330 × 2698 mm",
+      visualization: "3D Visualization",
+
+      // How It Works (old keys, kept for compatibility if needed)
       selectCargoType: "1. Select Cargo Type",
       selectCargoTypeDesc: "Choose between palletized cargo (standard slot) or non-standard cargo with custom dimensions.",
       chooseContainer: "2. Choose Container & Slots",
       chooseContainerDesc: "Select your preferred container and view available slots with transparent pricing.",
       completeBookingTitle: "3. Complete Booking",
       completeBookingDesc: "Provide shipping details, complete payment, and receive your booking confirmation with barcode.",
+      
+      // New How It Works keys
+      howItWorksIntro: "On this website you buy a place in a consolidated container following from Guangzhou to Moscow. ",
+      linkSlotSize: "slot size",
+      serviceIncludes: "The service includes: container transportation on the Guangzhou-Moscow route, customs clearance services, insurance.",
+      serviceDoesNotInclude: "The service does not include: delivery from the supplier's warehouse to the departure warehouse in Guangzhou, payment of customs duties, storage at the temporary storage warehouse in Moscow, removal of cargo to the final address. ",
+      linkOfferAgreement: "More details (the offer agreement)",
+      supplierAgreement: "Make sure that the terms of the agreement with the supplier indicate the terms of delivery FCA/FOB Guangzhou, confirm with the supplier the delivery to the departure warehouse within Guangzhou.",
+      selectContainer: "Select a container in accordance with the departure date and the latest date for providing the cargo and documents",
+      ensureCargoArrival: "Make sure that the cargo has time to arrive at the departure warehouse before the specified date",
+      selectSlots1: "Select the required number of slots. 1 slot is equal to 1 pallet (",
+      linkMoreDetails: "more details",
+      selectSlots2: "). If the cargo is not palletized, select the non-standard cargo tab, enter the parameters, then the system will determine the required number of slots.",
+      paySlots: "Pay for the selected slots",
+      afterPayment: "After payment, you will receive a payment receipt, a booking notification and instructions for sending the cargo, as well as the contact of the service manager",
+      followInstructions: "Follow the instructions and, if necessary, contact the service manager",
+      afterArrival: "After the cargo arrives in Moscow and passes customs clearance, arrange for the removal of the cargo from our warehouse.",
       
       // Month Selection
       selectMonth: "Select Month",
@@ -152,7 +180,11 @@ const resources = {
       languageSelector: "Language",
       englishLang: "English",
       russianLang: "Русский",
-      chineseLang: "中文"
+      chineseLang: "中文",
+
+      // Added translations
+      containerRoute: "Guangzhou - Moscow",
+      noContainersAvailable: "No containers available"
     }
   },
   ru: {
@@ -162,7 +194,7 @@ const resources = {
       subtitle: "Обеспечьте место для груза с прозрачными ценами",
       
       // Navigation
-      buyPlace: "Купить место",
+      home: "Главная",
       company: "Компания",
       slotSize: "Размер слота",
       howItWorks: "Как это работает",
@@ -188,6 +220,10 @@ const resources = {
       height: "Высота",
       length: "Длина",
       standardSlot: "Стандартный слот",
+      standardDimensions: "Стандартные размеры паллета",
+      oneSlotOnePallet: "1 слот = 1 стандартное паллетное место",
+      viewSlotDetails: "Посмотреть детали размера слота",
+      standardSlotSize: "2600мм × 1200мм × 2500мм",
       
       // Container Selection
       availableContainers: "Доступные контейнеры",
@@ -195,12 +231,14 @@ const resources = {
       select: "Выбрать",
       container: "Контейнер",
       departure: "Отправление",
+      deliveryDeadline: "Срок доставки груза",
+      route: "Маршрут",
       available: "Доступно",
       dimensionsDontFit: "Размеры не подходят",
       selectedSlots: "Выбрано",
       slots: "слот(ов)",
       total: "Итого",
-      selectThisContainer: "Выбрать этот контейнер",
+      selectThisContainer: "Подтвердить выбор",
       
       // Purchase Modal
       completeBooking: "Завершите бронирование",
@@ -272,14 +310,36 @@ const resources = {
       slotsPerContainer: "Слотов на контейнер",
       layout: "Расположение",
       containersPerMonth: "Контейнеров в месяц",
-      
-      // How It Works
+      weightCapacity: "Грузоподъемность",
+      maxWeightPerSlot: "Макс. вес на слот",
+      containerLoadCapacity: "Грузоподъемность контейнера",
+      containerSize: "Размер контейнера ДxШxВ: 12045 × 2330 × 2698 мм",
+      visualization: "3D Визуализация",
+
+      // How It Works (old keys, kept for compatibility if needed)
       selectCargoType: "1. Выберите тип груза",
       selectCargoTypeDesc: "Выберите между паллетизированным грузом (стандартный слот) или нестандартным грузом с пользовательскими размерами.",
       chooseContainer: "2. Выберите контейнер и слоты",
       chooseContainerDesc: "Выберите предпочитаемый контейнер и просмотрите доступные слоты с прозрачными ценами.",
       completeBookingTitle: "3. Завершите бронирование",
       completeBookingDesc: "Предоставьте детали доставки, завершите оплату и получите подтверждение бронирования со штрихкодом.",
+      
+      // New How It Works keys
+      howItWorksIntro: "На этом сайте вы покупаете место в консолидированном контейнере, следующем из Гуанчжоу в Москву. ",
+      linkSlotSize: "размер слота",
+      serviceIncludes: "Услуга включает: контейнерную перевозку по маршруту Гуанчжоу-Москва, услуги таможенного оформления, страхование.",
+      serviceDoesNotInclude: "Услуга не включает: доставку от склада поставщика до склада отправления в Гуанчжоу, оплату таможенных пошлин, хранение на складе временного хранения в Москве, вывоз груза на конечный адрес. ",
+      linkOfferAgreement: "Подробнее (договор оферты)",
+      supplierAgreement: "Убедитесь, что в условиях договора с поставщиком указаны условия доставки FCA/FOB Гуанчжоу, подтвердите с поставщиком доставку на склад отправления в пределах Гуанчжоу.",
+      selectContainer: "Выберите контейнер в соответствии с датой отправления и крайней датой предоставления груза и документов",
+      ensureCargoArrival: "Убедитесь, что груз успеет прибыть на склад отправления до указанной даты",
+      selectSlots1: "Выберите необходимое количество слотов. 1 слот равен 1 паллете (",
+      linkMoreDetails: "подробнее",
+      selectSlots2: "). Если груз не паллетизирован, выберите вкладку нестандартный груз, введите параметры, тогда система определит необходимое количество слотов.",
+      paySlots: "Оплатите выбранные слоты",
+      afterPayment: "После оплаты вы получите квитанцию об оплате, уведомление о бронировании и инструкции по отправке груза, а также контакт менеджера сервиса",
+      followInstructions: "Следуйте инструкциям и, при необходимости, свяжитесь с менеджером сервиса",
+      afterArrival: "После прибытия груза в Москву и прохождения таможенного оформления организуйте вывоз груза с нашего склада.",
       
       // Month Selection
       selectMonth: "Выберите месяц",
@@ -305,7 +365,11 @@ const resources = {
       languageSelector: "Язык",
       englishLang: "English",
       russianLang: "Русский",
-      chineseLang: "中文"
+      chineseLang: "中文",
+
+      // Added translations
+      containerRoute: "Гуанчжоу - Москва",
+      noContainersAvailable: "Нет доступных контейнеров"
     }
   },
   zh: {
@@ -315,7 +379,7 @@ const resources = {
       subtitle: "透明定价，确保您的货物空间",
       
       // Navigation
-      buyPlace: "购买位置",
+      home: "首页",
       company: "公司",
       slotSize: "槽位尺寸",
       howItWorks: "工作原理",
@@ -341,6 +405,10 @@ const resources = {
       height: "高度",
       length: "长度",
       standardSlot: "标准槽位",
+      standardDimensions: "标准托盘尺寸",
+      oneSlotOnePallet: "1个槽位 = 1个标准托盘空间",
+      viewSlotDetails: "查看槽位尺寸详情",
+      standardSlotSize: "2600毫米 × 1200毫米 × 2500毫米",
       
       // Container Selection
       availableContainers: "可用集装箱",
@@ -348,12 +416,14 @@ const resources = {
       select: "选择",
       container: "集装箱",
       departure: "出发",
+      deliveryDeadline: "货物交付截止日期",
+      route: "路线",
       available: "可用",
       dimensionsDontFit: "尺寸不合适",
       selectedSlots: "已选择",
       slots: "个槽位",
       total: "总计",
-      selectThisContainer: "选择此集装箱",
+      selectThisContainer: "确认选择",
       
       // Purchase Modal
       completeBooking: "完成预订",
@@ -425,14 +495,36 @@ const resources = {
       slotsPerContainer: "每个集装箱的槽位",
       layout: "布局",
       containersPerMonth: "每月集装箱",
+      weightCapacity: "重量容量",
+      maxWeightPerSlot: "每个槽位的最大重量",
+      containerLoadCapacity: "集装箱负载能力",
+      containerSize: "集装箱尺寸长x宽x高：12045 × 2330 × 2698 毫米",
+      visualization: "3D 可视化",
       
-      // How It Works
+      // How It Works (old keys, kept for compatibility if needed)
       selectCargoType: "1. 选择货物类型",
       selectCargoTypeDesc: "在托盘化货物（标准槽位）或具有自定义尺寸的非标准货物之间选择。",
       chooseContainer: "2. 选择集装箱和槽位",
       chooseContainerDesc: "选择您偏好的集装箱并查看具有透明定价的可用槽位。",
       completeBookingTitle: "3. 完成预订",
       completeBookingDesc: "提供运输详情，完成付款，并获得带有条形码的预订确认。",
+      
+      // New How It Works keys
+      howItWorksIntro: "在本网站上，您购买从广州到莫斯科的拼箱集装箱中的位置。 ",
+      linkSlotSize: "槽位尺寸",
+      serviceIncludes: "服务包括：广州-莫斯科路线的集装箱运输、海关清关服务、保险。",
+      serviceDoesNotInclude: "服务不包括：从供应商仓库到广州出发仓库的交付、海关关税支付、在莫斯科临时存储仓库的存储、将货物运送到最终地址。 ",
+      linkOfferAgreement: "更多详情 (要约协议)",
+      supplierAgreement: "确保与供应商的协议条款指明交付条款为FCA/FOB广州，与供应商确认交付到广州内的出发仓库。",
+      selectContainer: "根据出发日期和提供货物及文件的最后日期选择集装箱",
+      ensureCargoArrival: "确保货物在指定日期前到达出发仓库",
+      selectSlots1: "选择所需槽位数量。1个槽位等于1个托盘（",
+      linkMoreDetails: "更多详情",
+      selectSlots2: "）。如果货物未托盘化，选择非标准货物选项卡，输入参数，然后系统将确定所需槽位数量。",
+      paySlots: "支付所选槽位",
+      afterPayment: "支付后，您将收到付款收据、预订通知和货物发送说明，以及服务经理的联系方式",
+      followInstructions: "遵循说明，如有必要，联系服务经理",
+      afterArrival: "货物到达莫斯科并通过海关清关后，安排从我们的仓库取出货物。",
       
       // Month Selection
       selectMonth: "选择月份",
@@ -458,7 +550,11 @@ const resources = {
       languageSelector: "语言",
       englishLang: "English",
       russianLang: "Русский",
-      chineseLang: "中文"
+      chineseLang: "中文",
+
+      // Added translations
+      containerRoute: "广州 - 莫斯科",
+      noContainersAvailable: "没有可用容器"
     }
   }
 };

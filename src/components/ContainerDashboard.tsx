@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslation } from 'react-i18next';
 import { ContainerVisualization } from "./ContainerVisualization";
 import { CargoModeSelector } from "./CargoModeSelector";
@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   Ship, 
   Calendar, 
@@ -21,26 +22,91 @@ import {
   Building,
   Ruler,
   HelpCircle,
-  ShoppingCart
+  ShoppingCart,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import heroImage from "@/assets/hero-container.jpg";
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+import { OrbitControls, Stats } from '@react-three/drei';
+import { Suspense } from 'react';
+import * as THREE from 'three';
+import { useRef } from 'react';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 
 interface ContainerData {
   id: string;
   departureDate: Date;
+  deliveryDeadline: Date;
+  route: string;
   slots: SlotData[];
   availableSlots: number;
+}
+
+interface MaterialCreator {
+  preload(): void;
+  create(materialName: string): THREE.Material;
+  materials: { [key: string]: THREE.Material };
+}
+
+function Container3D() {
+  const ref = useRef<THREE.Group>(null!);
+
+  const materials = useLoader(MTLLoader, 'public/models/12281_Container_v2_L2.mtl') as MaterialCreator;
+
+  const obj = useLoader(OBJLoader, 'public/models/12281_Container_v2_L2.obj', (loader) => {
+    materials.preload();
+    loader.setMaterials(materials);
+  }) as THREE.Group;
+
+  useEffect(() => {
+    if (obj) {
+      obj.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: 'hsl(210,85%,35%)',
+            metalness: 0.3,
+            roughness: 0.4,
+            side: THREE.DoubleSide,
+          });
+        }
+      });
+    }
+  }, [obj]);
+
+  useFrame(() => {
+    if (ref.current) {
+      ref.current.rotation.y += 0.001;
+    }
+  });
+
+  return (
+    <>
+      <hemisphereLight intensity={2.0} groundColor="white" />
+      <spotLight position={[10, 20, 10]} angle={0.5} penumbra={1} intensity={3} castShadow />
+      <directionalLight position={[5, 10, 5]} intensity={2} />
+      <group ref={ref}>
+        <primitive
+          object={obj}
+          scale={[0.02, 0.02, 0.02]}
+          position={[0, -2, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        />
+      </group>
+    </>
+  );
 }
 
 export function ContainerDashboard() {
   const { t } = useTranslation();
   const [containers, setContainers] = useState<ContainerData[]>([]);
-  const [selectedContainer, setSelectedContainer] = useState<ContainerData | null>(null);
+  const [selectedContainerIndex, setSelectedContainerIndex] = useState(0);
   const [cargoMode, setCargoMode] = useState<'palletized' | 'non-standard'>('palletized');
-  const [weight, setWeight] = useState(1000);
   const [nonStandardDimensions, setNonStandardDimensions] = useState({
     width: 1200,
-    height: 1100,
+    height: 2500,
     length: 2600
   });
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
@@ -50,44 +116,78 @@ export function ContainerDashboard() {
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [direction, setDirection] = useState(0);
 
-  // Generate container data based on selected month
-  useEffect(() => {
-    const generateContainers = () => {
-      const containers: ContainerData[] = [];
+  const variants: Variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 200 : -200,
+      opacity: 0,
+      scale: 0.95,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: (direction: number) => ({
+      x: direction > 0 ? -200 : 200,
+      opacity: 0,
+      scale: 0.95,
+    }),
+  };
+
+  const generateContainers = useCallback(() => {
+    const newContainers: ContainerData[] = [];
+    for (let i = 0; i < 2; i++) {
+      const departureDate = new Date(selectedYear, selectedMonth, 5 + (i * 15));
+      const deliveryDeadline = new Date(departureDate);
+      deliveryDeadline.setDate(departureDate.getDate() - 3);
       
-      // Generate 2 containers for selected month
-      for (let i = 0; i < 2; i++) {
-        const departureDate = new Date(selectedYear, selectedMonth, 5 + (i * 15)); // 5th and 20th of month
-        
-        const slots: SlotData[] = Array.from({ length: 20 }, (_, index) => ({
-          id: index + 1,
-          price: Math.floor(Math.random() * 300) + 200, // $200-500
-          isOccupied: Math.random() < 0.3, // 30% occupied
-          dimensions: {
-            width: 1200,
-            height: 1100,
-            length: 2600
-          },
-          weight: Math.random() < 0.7 ? Math.floor(Math.random() * 800) + 500 : undefined,
-          maxWeight: 1300,
-          occupiedBy: Math.random() < 0.3 ? "Previous Customer" : undefined
-        }));
+      const slots: SlotData[] = Array.from({ length: 20 }, (_, index) => ({
+        id: index + 1,
+        price: index < 7 ? 200 : index < 14 ? 300 : 500,
+        isOccupied: false,
+        dimensions: { width: 1100, height: 2500, length: 1200 },
+        occupiedBy: undefined,
+      }));
 
-        containers.push({
-          id: `CNT-${String(i + 1).padStart(3, '0')}`,
-          departureDate,
-          slots,
-          availableSlots: slots.filter(slot => !slot.isOccupied).length
-        });
+      const occupiedIndices = new Set<number>();
+      while (occupiedIndices.size < 6) {
+        const rand = Math.floor(Math.random() * 20);
+        occupiedIndices.add(rand);
       }
-      
-      setContainers(containers);
-      setSelectedContainer(containers[0]);
-    };
+      occupiedIndices.forEach(idx => {
+        slots[idx].isOccupied = true;
+        slots[idx].occupiedBy = "Previous Customer";
+      });
 
-    generateContainers();
-  }, [selectedMonth, selectedYear]);
+      newContainers.push({
+        id: `CNT-${String(i + 1).padStart(3, '0')}`,
+        departureDate,
+        deliveryDeadline,
+        route: t('containerRoute'),
+        slots,
+        availableSlots: 14,
+      });
+    }
+    return newContainers;
+  }, [selectedMonth, selectedYear, t]);
+
+  useEffect(() => {
+    const newContainers = generateContainers();
+    setContainers(newContainers);
+    setSelectedContainerIndex(0);
+  }, [generateContainers]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') handlePrevContainer();
+      if (e.key === 'ArrowRight') handleNextContainer();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [containers.length]);
 
   const handleSlotSelection = (slots: SlotData[], price: number) => {
     setSelectedSlots(slots);
@@ -100,30 +200,68 @@ export function ContainerDashboard() {
     setShowPurchaseModal(false);
     setShowInvoice(true);
     
-    // Update container slots as occupied
-    if (selectedContainer) {
-      const updatedSlots = selectedContainer.slots.map(slot => 
+    if (containers[selectedContainerIndex]) {
+      const updatedSlots = containers[selectedContainerIndex].slots.map(slot => 
         selectedSlots.some(s => s.id === slot.id) 
           ? { ...slot, isOccupied: true, occupiedBy: invoice.customerInfo.name }
           : slot
       );
       
       const updatedContainer = { 
-        ...selectedContainer, 
+        ...containers[selectedContainerIndex], 
         slots: updatedSlots,
         availableSlots: updatedSlots.filter(slot => !slot.isOccupied).length
       };
       
       setContainers(prev => 
-        prev.map(c => c.id === selectedContainer.id ? updatedContainer : c)
+        prev.map((c, index) => index === selectedContainerIndex ? updatedContainer : c)
       );
-      setSelectedContainer(updatedContainer);
+    }
+    setSelectedSlots([]);
+  };
+
+  const handlePrevContainer = () => {
+    if (containers.length <= 1 || selectedContainerIndex === 0) return;
+    setDirection(-1);
+    setSelectedContainerIndex(prev => prev - 1);
+    setSelectedSlots([]);
+  };
+
+  const handleNextContainer = () => {
+    if (containers.length <= 1 || selectedContainerIndex === containers.length - 1) return;
+    setDirection(1);
+    setSelectedContainerIndex(prev => prev + 1);
+    setSelectedSlots([]);
+  };
+
+  const handleDragEnd = (_: any, info: any) => {
+    const dragThreshold = 30;
+    if (info.offset.x < -dragThreshold && selectedContainerIndex < containers.length - 1) {
+      handleNextContainer();
+    }
+    if (info.offset.x > dragThreshold && selectedContainerIndex > 0) {
+      handlePrevContainer();
     }
   };
 
+  const currentContainer = useMemo(() => containers[selectedContainerIndex], [containers, selectedContainerIndex]);
+
+  if (containers.length === 0) {
+    return <div className="text-center py-8">{t('noContainersAvailable')}</div>;
+  }
+
+  const steps = [
+    { text: t('selectContainer'), icon: Calendar },
+    { text: t('ensureCargoArrival'), icon: CheckCircle },
+    { text: <>{t('selectSlots1')}<a className="text-primary underline cursor-pointer" onClick={() => setActiveTab('size')}>{t('linkMoreDetails')}</a>{t('selectSlots2')}</>, icon: ShoppingCart },
+    { text: t('paySlots'), icon: DollarSign },
+    { text: t('afterPayment'), icon: ArrowRight },
+    { text: t('followInstructions'), icon: HelpCircle },
+    { text: t('afterArrival'), icon: Ship },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
       <div 
         className="relative h-64 bg-cover bg-center bg-gradient-ocean"
         style={{
@@ -140,19 +278,17 @@ export function ContainerDashboard() {
             </p>
           </div>
         </div>
-        
-        {/* Language Selector */}
         <div className="absolute top-4 right-4">
           <LanguageSelector />
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-[600px] mx-auto">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 lg:w-full mx-auto">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <ShoppingCart className="w-4 h-4" />
-              {t('buyPlace')}
+              {t('home')}
             </TabsTrigger>
             <TabsTrigger value="company" className="flex items-center gap-2">
               <Building className="w-4 h-4" />
@@ -169,70 +305,13 @@ export function ContainerDashboard() {
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <Ship className="w-8 h-8 text-primary" />
-                    <div>
-                      <p className="text-2xl font-bold">{containers.length}</p>
-                      <p className="text-sm text-muted-foreground">{t('containersThisMonth')}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <Package className="w-8 h-8 text-maritime-container" />
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {containers.reduce((sum, c) => sum + c.availableSlots, 0)}
-                      </p>
-                      <p className="text-sm text-muted-foreground">{t('availableSlots')}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-8 h-8 text-maritime-port" />
-                    <div>
-                      <p className="text-2xl font-bold">$200-500</p>
-                      <p className="text-sm text-muted-foreground">{t('priceRange')}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-8 h-8 text-maritime-steel" />
-                    <div>
-                      <p className="text-2xl font-bold">1300kg</p>
-                      <p className="text-sm text-muted-foreground">{t('maxWeightSlot')}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Cargo Configuration */}
             <CargoModeSelector
               mode={cargoMode}
               onModeChange={setCargoMode}
               dimensions={nonStandardDimensions}
               onDimensionsChange={setNonStandardDimensions}
-              weight={weight}
-              onWeightChange={setWeight}
+              onTabChange={setActiveTab}
             />
-
-            {/* Container Selection */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold">{t('availableContainers')}</h2>
@@ -245,31 +324,56 @@ export function ContainerDashboard() {
                   }}
                 />
               </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {containers.map((container) => (
-                  <div key={container.id} className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold">{t('container')} {container.id}</h3>
-                      <Button
-                        variant={selectedContainer?.id === container.id ? "default" : "outline"}
-                        onClick={() => setSelectedContainer(container)}
-                        size="sm"
+              <div className="space-y-6">
+                <div className="relative min-h-[500px]">
+                  <AnimatePresence initial={false} custom={direction}>
+                    {currentContainer && (
+                      <motion.div
+                        key={currentContainer.id}
+                        custom={direction}
+                        variants={variants}
+                        initial="enter"
+                        animate="center"
+                        exit="exit"
+                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        onDragEnd={handleDragEnd}
+                        className="absolute w-full cursor-grab active:cursor-grabbing"
                       >
-                        {selectedContainer?.id === container.id ? t('selected') : t('select')}
-                      </Button>
-                    </div>
-                    
-                    {selectedContainer?.id === container.id && (
-                      <ContainerVisualization
-                        container={container}
-                        onSlotSelect={handleSlotSelection}
-                        mode={cargoMode}
-                        nonStandardDimensions={cargoMode === 'non-standard' ? nonStandardDimensions : undefined}
-                      />
+                        <ContainerVisualization
+                          container={currentContainer}
+                          onSlotSelect={handleSlotSelection}
+                          mode={cargoMode}
+                          nonStandardDimensions={cargoMode === 'non-standard' ? nonStandardDimensions : undefined}
+                        />
+                      </motion.div>
                     )}
+                  </AnimatePresence>
+                </div>
+                {containers.length > 1 && (
+                  <div className="flex justify-center items-center gap-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handlePrevContainer}
+                      disabled={selectedContainerIndex === 0}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <span className="text-muted-foreground">
+                      {t('container')} {selectedContainerIndex + 1} / {containers.length}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleNextContainer}
+                      disabled={selectedContainerIndex === containers.length - 1}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </TabsContent>
@@ -281,7 +385,6 @@ export function ContainerDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>{t('companyDesc')}</p>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <h3 className="font-semibold mb-2">{t('ourMission')}</h3>
@@ -289,7 +392,6 @@ export function ContainerDashboard() {
                       {t('missionDesc')}
                     </p>
                   </div>
-                  
                   <div>
                     <h3 className="font-semibold mb-2">{t('ourExperience')}</h3>
                     <p className="text-sm text-muted-foreground">
@@ -312,27 +414,33 @@ export function ContainerDashboard() {
                     <h3 className="font-semibold text-lg">{t('dimensionsLabel')}</h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
+                        <span>{t('length')}:</span>
+                        <span className="font-mono">1200 mm</span>
+                      </div>
+                      <div className="flex justify-between">
                         <span>{t('width')}:</span>
-                        <span className="font-mono">1,200 mm</span>
+                        <span className="font-mono">1100 mm</span>
                       </div>
                       <div className="flex justify-between">
                         <span>{t('height')}:</span>
-                        <span className="font-mono">1,100 mm</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>{t('length')}:</span>
-                        <span className="font-mono">2,600 mm</span>
-                      </div>
-                      <div className="flex justify-between font-semibold">
-                        <span>{t('maxWeight')}:</span>
-                        <span className="font-mono">1,300 kg</span>
+                        <span className="font-mono">2500 mm</span>
                       </div>
                     </div>
-                    <div className="text-xs text-muted-foreground mt-4 p-3 bg-muted/30 rounded">
-                      {t('containerDimensions')}
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-4 p-3 bg-muted/30 rounded">
+                      <span>{t('oneSlotOnePallet')}</span>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <HelpCircle className="w-3 h-3" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{t('standardSlotSize')}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <div className="text-xs text-muted-foreground p-3 bg-muted/30 rounded">
+                      {t('containerSize')}
                     </div>
                   </div>
-                  
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">{t('containerLayout')}</h3>
                     <div className="space-y-2">
@@ -342,13 +450,37 @@ export function ContainerDashboard() {
                       </div>
                       <div className="flex justify-between">
                         <span>{t('layout')}:</span>
-                        <span className="font-mono">4 × 5 grid</span>
+                        <span className="font-mono">10 × 2 grid</span>
                       </div>
                       <div className="flex justify-between">
                         <span>{t('containersPerMonth')}:</span>
                         <span className="font-mono">2 containers</span>
                       </div>
                     </div>
+                    <h3 className="font-semibold text-lg mt-6">{t('weightCapacity')}</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span>{t('maxWeightPerSlot')}:</span>
+                        <span className="font-mono">1,250 kg</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>{t('containerLoadCapacity')}:</span>
+                        <span className="font-mono">25,000 kg</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-8">
+                  <h3 className="font-semibold text-lg mb-4">{t('visualization')}</h3>
+                  <div className="flex justify-center items-center h-96">
+                    <Canvas camera={{ position: [0, 0, 15] }}>
+                      <ambientLight intensity={1.5} />
+                      <pointLight position={[10, 10, 10]} intensity={3} />
+                      <Suspense fallback={null}>
+                        <Container3D />
+                      </Suspense>
+                      <OrbitControls />
+                    </Canvas>
                   </div>
                 </div>
               </CardContent>
@@ -356,55 +488,74 @@ export function ContainerDashboard() {
           </TabsContent>
 
           <TabsContent value="how-it-works" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Package className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold mb-2">{t('selectCargoType')}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t('selectCargoTypeDesc')}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('howItWorks')}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <p className="mb-4">
+                    {t('howItWorksIntro')}
+                    <a 
+                      className="text-primary underline cursor-pointer" 
+                      onClick={() => setActiveTab('size')}
+                    >
+                      {t('linkSlotSize')}
+                    </a>.
                   </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Ship className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold mb-2">{t('chooseContainer')}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t('chooseContainerDesc')}
+                  <h3 className="font-semibold text-lg mb-2">Included in the Service</h3>
+                  <p>{t('serviceIncludes')}</p>
+                  <h3 className="font-semibold text-lg mb-2 mt-4">Not Included in the Service</h3>
+                  <p>
+                    {t('serviceDoesNotInclude')}
+                    <a 
+                      className="text-primary underline" 
+                      href="#offer-agreement"
+                    >
+                      {t('linkOfferAgreement')}
+                    </a>.
                   </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle className="w-6 h-6 text-primary" />
-                  </div>
-                  <h3 className="font-semibold mb-2">{t('completeBookingTitle')}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {t('completeBookingDesc')}
-                  </p>
-                </CardContent>
-              </Card>
+                  <h3 className="font-semibold text-lg mb-2 mt-4">Important Note</h3>
+                  <p>{t('supplierAgreement')}</p>
+                </div>
+              </CardContent>
+            </Card>
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">Step-by-Step Guide</h2>
+              {steps.map((step, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                          <step.icon className="h-6 w-6" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">Step {index + 1}</h4>
+                          <p className="text-muted-foreground">{step.text}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
             </div>
           </TabsContent>
         </Tabs>
       </div>
 
-      {/* Modals */}
-      {showPurchaseModal && selectedContainer && (
+      {showPurchaseModal && currentContainer && (
         <PurchaseModal
           isOpen={showPurchaseModal}
           onClose={() => setShowPurchaseModal(false)}
           selectedSlots={selectedSlots}
           totalPrice={totalPrice}
-          containerInfo={selectedContainer}
+          containerInfo={currentContainer}
           onPurchaseComplete={handlePurchaseComplete}
         />
       )}

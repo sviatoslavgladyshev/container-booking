@@ -141,9 +141,6 @@ export function PurchaseModal({
     }, 2000);
   };
 
-  const totalWeight = selectedSlots.reduce((sum, slot) => sum + (slot.weight || 0), 0);
-  const isWeightValid = selectedSlots.every(slot => (slot.weight || 0) <= slot.maxWeight);
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -185,14 +182,6 @@ export function PurchaseModal({
                   <span>{t('total')}</span>
                   <span>${totalPrice}</span>
                 </div>
-
-                {!isWeightValid && (
-                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                    <p className="text-destructive text-sm">
-                      ⚠️ {t('weightExceeds')}
-                    </p>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
@@ -311,11 +300,10 @@ export function PurchaseModal({
                     </div>
                   </div>
                 </div>
-
                 <div className="flex justify-end mt-6">
                   <Button 
                     onClick={handleProceedToPayment}
-                    disabled={!validateCustomerInfo() || !isWeightValid}
+                    disabled={!validateCustomerInfo()}
                     variant="ocean"
                     size="lg"
                   >
