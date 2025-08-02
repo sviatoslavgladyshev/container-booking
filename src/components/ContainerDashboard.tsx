@@ -35,6 +35,8 @@ import * as THREE from 'three';
 import { useRef } from 'react';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+import mtlUrl from '@/assets/12281_Container_v2_L2.mtl?url';
+import objUrl from '@/assets/12281_Container_v2_L2.obj?url';
 
 interface ContainerData {
   id: string;
@@ -54,9 +56,9 @@ interface MaterialCreator {
 function Container3D() {
   const ref = useRef<THREE.Group>(null!);
 
-  const materials = useLoader(MTLLoader, '@/assets/12281_Container_v2_L2.mtl') as MaterialCreator;
+  const materials = useLoader(MTLLoader, mtlUrl) as MaterialCreator;
 
-  const obj = useLoader(OBJLoader, '@/assets/12281_Container_v2_L2.obj', (loader) => {
+  const obj = useLoader(OBJLoader, objUrl, (loader) => {
     materials.preload();
     loader.setMaterials(materials);
   }) as THREE.Group;
@@ -105,9 +107,9 @@ export function ContainerDashboard() {
   const [selectedContainerIndex, setSelectedContainerIndex] = useState(0);
   const [cargoMode, setCargoMode] = useState<'palletized' | 'non-standard'>('palletized');
   const [nonStandardDimensions, setNonStandardDimensions] = useState({
-    width: 1200,
+    width: 1100,
     height: 2500,
-    length: 2600
+    length: 1200
   });
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showInvoice, setShowInvoice] = useState(false);

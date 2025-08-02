@@ -38,7 +38,7 @@ const resources = {
       standardDimensions: "Standard Pallet Dimensions",
       oneSlotOnePallet: "1 slot = 1 standard pallet space",
       viewSlotDetails: "View Slot Size Details",
-      standardSlotSize: "2600mm × 1200mm × 2500mm",
+      standardSlotSize: "1200mm × 1100mm × 2500mm",
       
       // Container Selection
       availableContainers: "Available Containers",
@@ -223,7 +223,7 @@ const resources = {
       standardDimensions: "Стандартные размеры паллета",
       oneSlotOnePallet: "1 слот = 1 стандартное паллетное место",
       viewSlotDetails: "Посмотреть детали размера слота",
-      standardSlotSize: "2600мм × 1200мм × 2500мм",
+      standardSlotSize: "1200мм × 1100мм × 2500мм",
       
       // Container Selection
       availableContainers: "Доступные контейнеры",
@@ -408,7 +408,7 @@ const resources = {
       standardDimensions: "标准托盘尺寸",
       oneSlotOnePallet: "1个槽位 = 1个标准托盘空间",
       viewSlotDetails: "查看槽位尺寸详情",
-      standardSlotSize: "2600毫米 × 1200毫米 × 2500毫米",
+      standardSlotSize: "1200毫米 × 1100毫米 × 2500毫米",
       
       // Container Selection
       availableContainers: "可用集装箱",

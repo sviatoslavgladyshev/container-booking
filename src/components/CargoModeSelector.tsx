@@ -29,7 +29,7 @@ export function CargoModeSelector({
 }: CargoModeSelectorProps) {
   const { t } = useTranslation();
   const [localDimensions, setLocalDimensions] = useState(
-    dimensions || { width: 1200, height: 2500, length: 2600 }
+    dimensions || { width: 1100, height: 2500, length: 1200 }
   );
 
   const handleDimensionChange = (field: 'width' | 'height' | 'length', value: string) => {
@@ -117,7 +117,7 @@ export function CargoModeSelector({
                 <Input
                   id="pallet-length"
                   type="text"
-                  value="2600"
+                  value="1200"
                   readOnly
                   className="bg-muted text-muted-foreground cursor-not-allowed"
                 />
@@ -127,7 +127,7 @@ export function CargoModeSelector({
                 <Input
                   id="pallet-width"
                   type="text"
-                  value="1200"
+                  value="1100"
                   readOnly
                   className="bg-muted text-muted-foreground cursor-not-allowed"
                 />
@@ -176,7 +176,7 @@ export function CargoModeSelector({
                   type="number"
                   value={localDimensions.length}
                   onChange={(e) => handleDimensionChange('length', e.target.value)}
-                  placeholder="2600"
+                  placeholder="1200"
                 />
               </div>
               <div className="space-y-2">
@@ -186,7 +186,7 @@ export function CargoModeSelector({
                   type="number"
                   value={localDimensions.width}
                   onChange={(e) => handleDimensionChange('width', e.target.value)}
-                  placeholder="1200"
+                  placeholder="1100"
                 />
               </div>
               <div className="space-y-2">
@@ -224,3 +224,6 @@ export function CargoModeSelector({
     </Card>
   );
 }
+
+
+// 12.031X2.348X2.7

@@ -17,11 +17,11 @@ const CONTAINER_DIMENSIONS: ContainerDimensions = {
   length: 2620
 };
 
-// Standard slot dimensions: 1200mm × 1100mm × 2600mm
+// Standard slot dimensions: 1200mm × 1100mm × 2500mm
 const STANDARD_SLOT_DIMENSIONS: SlotDimensions = {
   width: 1200,
-  height: 1100,
-  length: 2600
+  height: 2500,
+  length: 1100
 };
 
 export function checkCargoFitsInContainer(cargoDimensions: ContainerDimensions): boolean {
